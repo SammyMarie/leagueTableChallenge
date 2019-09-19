@@ -48,29 +48,6 @@ public class LeagueTable {
         });
     }
 
-    private void updateLeagueEntry(Match match, String gameResult) {
-        LeagueTableEntry leagueEntry = tableEntryList.stream()
-                                                     .filter(tableEntry -> tableEntry.getTeamName().equalsIgnoreCase(match.getHomeTeam()))
-                                                     .findFirst()
-                                                     .orElseThrow(() -> new IllegalArgumentException("Entry does not exist!"));
-
-        if(gameResult.equals(WON)){
-            leagueEntry.setPoints(leagueEntry.getPoints() + 3);
-            leagueEntry.setWon(leagueEntry.getWon() + 1);
-        }else if(gameResult.equals(LOST)){
-            leagueEntry.setLost(leagueEntry.getLost() + 1);
-        }else{
-            leagueEntry.setPoints(leagueEntry.getPoints() + 1);
-            leagueEntry.setDrawn(leagueEntry.getDrawn() + 1);
-        }
-        int goalDifference = match.getHomeScore() - match.getAwayScore();
-
-        leagueEntry.setPlayed(leagueEntry.getPlayed() + 1);
-        leagueEntry.setGoalsFor(leagueEntry.getGoalsFor() + match.getHomeScore());
-        leagueEntry.setGoalsAgainst(leagueEntry.getGoalsAgainst() + match.getAwayScore());
-        leagueEntry.setGoalDifference(leagueEntry.getGoalDifference() + goalDifference);
-    }
-
     private LeagueTableEntry createLeagueEntry(Match match, String gameResult) {
 
         int matchesPlayed = 1;
@@ -103,6 +80,33 @@ public class LeagueTable {
                                .goalDifference(goalDifference)
                                .points(matchPoints)
                                .build();
+    }
+
+    private void updateLeagueEntry(Match match, String gameResult) {
+        LeagueTableEntry leagueEntry = tableEntryList.stream()
+                                                     .filter(tableEntry -> tableEntry.getTeamName().equalsIgnoreCase(match.getHomeTeam()))
+                                                     .findFirst()
+                                                     .orElseThrow(() -> new IllegalArgumentException("Entry does not exist!"));
+
+        int goalDifference = assignPoints(match, gameResult, leagueEntry);
+
+        leagueEntry.setPlayed(leagueEntry.getPlayed() + 1);
+        leagueEntry.setGoalsFor(leagueEntry.getGoalsFor() + match.getHomeScore());
+        leagueEntry.setGoalsAgainst(leagueEntry.getGoalsAgainst() + match.getAwayScore());
+        leagueEntry.setGoalDifference(leagueEntry.getGoalDifference() + goalDifference);
+    }
+
+    private int assignPoints(Match match, String gameResult, LeagueTableEntry leagueEntry) {
+        if(gameResult.equals(WON)){
+            leagueEntry.setPoints(leagueEntry.getPoints() + 3);
+            leagueEntry.setWon(leagueEntry.getWon() + 1);
+        }else if(gameResult.equals(LOST)){
+            leagueEntry.setLost(leagueEntry.getLost() + 1);
+        }else{
+            leagueEntry.setPoints(leagueEntry.getPoints() + 1);
+            leagueEntry.setDrawn(leagueEntry.getDrawn() + 1);
+        }
+        return match.getHomeScore() - match.getAwayScore();
     }
 
     private boolean isTeamExistsInTable(String homeTeam) {
